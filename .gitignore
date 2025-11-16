@@ -1,0 +1,39 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Cargo
+Cargo.lock
+# Note: For applications, you may want to commit Cargo.lock
+# Uncomment the line above if you want to ignore it
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Cargo local configuration (keep .cargo/config.toml if it's project-specific)
+# .cargo/config.toml
+
+# Environment files
+.env
+.env.local
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Backup files
+*.bak
+*.tmp
+
