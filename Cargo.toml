@@ -5,7 +5,10 @@ edition = "2024"
 description = "A lightweight Git automation tool that generates commit messages from diffs."
 license = "MIT"
 
+
 [[bin]]
+name = "gitx"
+path = "src/main.rs"
 
 [dependencies]
 regex = "1"
