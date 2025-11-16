@@ -1,0 +1,1 @@
+/home/champ/Projects/Mgit/target/release/mgit: /home/champ/Projects/Mgit/src/ai.rs /home/champ/Projects/Mgit/src/config.rs /home/champ/Projects/Mgit/src/diff.rs /home/champ/Projects/Mgit/src/git.rs /home/champ/Projects/Mgit/src/main.rs

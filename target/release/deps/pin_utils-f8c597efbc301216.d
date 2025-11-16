@@ -1,0 +1,9 @@
+/home/champ/Projects/Mgit/target/release/deps/pin_utils-f8c597efbc301216.d: /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/lib.rs /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/stack_pin.rs /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/projection.rs
+
+/home/champ/Projects/Mgit/target/release/deps/libpin_utils-f8c597efbc301216.rlib: /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/lib.rs /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/stack_pin.rs /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/projection.rs
+
+/home/champ/Projects/Mgit/target/release/deps/libpin_utils-f8c597efbc301216.rmeta: /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/lib.rs /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/stack_pin.rs /home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/projection.rs
+
+/home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/lib.rs:
+/home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/stack_pin.rs:
+/home/champ/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pin-utils-0.1.0/src/projection.rs:
