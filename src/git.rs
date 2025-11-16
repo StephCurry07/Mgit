@@ -15,8 +15,13 @@ pub fn run(cmd: &str, args: &[&str]) {
     }
 }
 
-pub fn git_add_all() {
-    run("git", &["add", "."]);
+pub fn git_add_specific(files: &[String]) {
+    let mut cmd = Command::new("git");
+    cmd.arg("add");
+    for f in files {
+        cmd.arg(f);
+    }
+    cmd.status().expect("Failed to stage files");
 }
 
 pub fn git_commit(msg: &str) {

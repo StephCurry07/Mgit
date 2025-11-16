@@ -6,18 +6,11 @@ pub fn get_remote_origin() -> Option<String> {
         .output()
         .ok()?;
 
-    if !output.status.success() {
-        return None;
-    }
+    if !output.status.success() { return None; }
 
     let url = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    if url.is_empty() {
-        None
-    } else {
-        Some(url)
-    }
+    if url.is_empty() { None } else { Some(url) }
 }
-
 
 pub fn get_current_branch() -> Option<String> {
     let output = Command::new("git")
@@ -30,3 +23,19 @@ pub fn get_current_branch() -> Option<String> {
     let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
     Some(branch)
 }
+
+pub fn set_ssh_remote(user: &str, repo: &str) {
+    let ssh_url = format!("git@github.com:{}/{}.git", user, repo);
+
+    Command::new("git")
+        .args(["remote", "set-url", "origin", &ssh_url])
+        .status()
+        .expect("Failed to set SSH remote");
+}
+
+pub fn get_repo_parts(url: &str) -> Option<(String, String)> {
+    let repo = url.split('/').last()?.replace(".git", "");
+    let user = url.split('/').rev().nth(1)?.to_string();
+    Some((user, repo))
+}
+

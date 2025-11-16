@@ -15,12 +15,3 @@ pub fn has_commits() -> bool {
 
     result.map(|o| o.status.success()).unwrap_or(false)
 }
-
-pub fn has_changes() -> bool {
-    let output = Command::new("git")
-        .args(["status", "--porcelain"])
-        .output()
-        .expect("Failed to run git status");
-
-    !String::from_utf8_lossy(&output.stdout).trim().is_empty()
-}

@@ -4,30 +4,45 @@ mod ai;
 mod git;
 mod git_status;
 mod git_remote;
+mod ssh_setup;
+mod staging;
 
+use clap::{Parser, Subcommand};
 use std::io::{self, Write};
 use config::Config;
 
+#[derive(Parser)]
+#[command(author, version, about="gitx - AI Git Assistant")]
+struct Args {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Save your Gemini API key
+    Setup,
+
+    /// Automatically fix "origin" to SSH and configure GitHub auth
+    FixRemote,
+
+    /// Stage files smartly, generate AI commit, push to remote
+    Push {
+        /// Exclude files by pattern: gitx push -x file1 file2 "*.log"
+        #[arg(short='x', long="exclude", num_args = 1.., value_delimiter = ' ')]
+        exclude: Vec<String>,
+    },
+}
+
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
+    let args = Args::parse();
 
-    if args.len() == 1 {
-        println!("Usage: mgit push | setup");
-        return;
-    }
+    match args.command {
 
-    match args[1].as_str() {
-        "init" => {
-            if git_status::is_git_repo() {
-                println!("✔ This directory is already a Git repository.");
-            } else {
-                println!("Initializing Git repository...");
-                git::run("git", &["init"]);
-                println!("✔ Repository initialized.");
-            }
-        }
-
-        "setup" => {
+        /* ────────────────────────────────────────────────
+           gitx setup
+        ───────────────────────────────────────────────── */
+        Commands::Setup => {
             print!("Enter your Gemini API key: ");
             io::stdout().flush().unwrap();
 
@@ -35,56 +50,133 @@ fn main() {
             io::stdin().read_line(&mut key).unwrap();
 
             Config::save(key.trim());
-            println!("API key saved!");
+            println!("🔑 API key saved!");
         }
 
-        "push" => {
-            // 1. Check if this is a git repo
+        /* ────────────────────────────────────────────────
+           gitx fix-remote
+        ───────────────────────────────────────────────── */
+        Commands::FixRemote => {
+            use git_remote::*;
+            use ssh_setup::*;
+
             if !git_status::is_git_repo() {
                 println!("❌ Not a Git repository.");
-                println!("Run `git init` or `mgit init` first.");
                 return;
             }
 
-            // 2. Check if repo has commits
+            let origin = match get_remote_origin() {
+                Some(o) => o,
+                None => {
+                    println!("❌ No remote 'origin' found.");
+                    return;
+                }
+            };
+
+            println!("📦 Current remote: {}", origin);
+
+            if origin.starts_with("https://") {
+                println!("🔄 Switching remote HTTPS → SSH...");
+
+                if let Some((user, repo)) = get_repo_parts(&origin) {
+                    set_ssh_remote(&user, &repo);
+                    println!("✔ SSH remote set: git@github.com:{}/{}.git", user, repo);
+                } else {
+                    println!("❌ Could not parse remote URL.");
+                    return;
+                }
+            } else {
+                println!("✔ Remote already using SSH.");
+            }
+
+            ensure_ssh_key();
+            show_public_key();
+            test_github_connection();
+
+            println!("🎉 fix-remote completed!");
+        }
+
+        /* ────────────────────────────────────────────────
+           gitx push (with -x exclusions)
+        ───────────────────────────────────────────────── */
+        Commands::Push { exclude } => {
+
+            // 1. Must be a Git repo
+            if !git_status::is_git_repo() {
+                println!("❌ Not a Git repository.");
+                return;
+            }
+
+            // 2. Must have at least one commit
             if !git_status::has_commits() {
-                println!("❌ Repository has no commits yet.");
-                println!("Run `mgit commit` or make the first commit manually.");
+                println!("❌ No commits yet. Create the first commit manually.");
                 return;
             }
 
-            // check remote origin
+            // 3. Show remote + branch
             if let Some(remote) = git_remote::get_remote_origin() {
                 println!("📦 Remote: {}", remote);
             } else {
                 println!("❌ No remote 'origin' found.");
-                println!("Add one with:");
-                println!("  git remote add origin <url>");
+                println!("Run: git remote add origin <url>");
                 return;
             }
-            
+
             if let Some(branch) = git_remote::get_current_branch() {
                 println!("🌿 Branch: {}", branch);
-            }            
-            // 3. Check if repo has unstaged/unstaged changes
-            if !git_status::has_changes() {
+            }
+
+            // 4. Get file changes
+            let changes = staging::get_changes();
+
+            if changes.is_empty() {
                 println!("✔ No changes to commit.");
                 return;
             }
 
-            let cfg = Config::load().expect("Run `mgit setup` first");
+            // 5. Smart filtering
+            let (to_stage, ignored_default, ignored_user) =
+                staging::filter_changes(&changes, &exclude);
 
+            println!("\n📄 Detected changes:");
+            for c in &changes {
+                println!(" {} {}", c.status, c.path);
+            }
+
+            println!("\n🛑 Excluded by DEFAULT rules:");
+            for f in ignored_default {
+                println!(" - {}", f);
+            }
+
+            println!("\n🛑 Excluded by -x patterns:");
+            for f in ignored_user {
+                println!(" - {}", f);
+            }
+
+            println!("\n📦 Final files to stage:");
+            for f in &to_stage {
+                println!(" - {}", f);
+            }
+
+            if to_stage.is_empty() {
+                println!("❌ Nothing to stage after exclusions.");
+                return;
+            }
+
+            // 6. Stage only selected files
+            git::git_add_specific(&to_stage);
+
+            // 7. AI commit message
+            let cfg = Config::load().expect("Run gitx setup first.");
             let diff = diff::get_diff();
             let msg = ai::generate_message(&diff, &cfg);
-            println!("Generated commit message:\n{}\n", msg);
 
-            git::git_add_all();
+            println!("\n🧠 Commit message:\n{}\n", msg);
+
             git::git_commit(&msg);
             git::git_push();
 
-            println!("🚀 mgit push complete!");
+            println!("🚀 gitx push complete!");
         }
-
-        _ => println!("Unknown command"),
     }
 }

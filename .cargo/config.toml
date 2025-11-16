@@ -1,0 +1,8 @@
+[build]
+# Explicitly set the target to the current platform to avoid cross-compilation issues
+target = "x86_64-unknown-linux-gnu"
+
+[target.x86_64-unknown-linux-gnu]
+# Ensure we use the GNU toolchain for Linux
+rustflags = []
+
