@@ -166,6 +166,20 @@ fn main() {
             // 6. Stage only selected files
             git::git_add_specific(&to_stage);
 
+            // 🟡 ASK FOR CONFIRMATION BEFORE COMMIT & PUSH
+            use std::io::{self, Write};
+            print!("\nProceed with commit and push? (y/n): ");
+            io::stdout().flush().unwrap();
+
+            let mut confirm = String::new();
+            io::stdin().read_line(&mut confirm).unwrap();
+
+            let confirm = confirm.trim().to_lowercase();
+            if confirm != "y" && confirm != "yes" {
+                println!("❌ Aborted by user.");
+                return;
+            }
+
             // 7. AI commit message
             let cfg = Config::load().expect("Run gitx setup first.");
             let diff = diff::get_diff();
