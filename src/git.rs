@@ -1,6 +1,6 @@
 use std::process::{Command, Stdio};
 
-fn run(cmd: &str, args: &[&str]) {
+pub fn run(cmd: &str, args: &[&str]) {
     let status = Command::new(cmd)
         .args(args)
         .stdin(Stdio::inherit())
