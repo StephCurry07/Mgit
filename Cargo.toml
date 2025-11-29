@@ -1,5 +1,5 @@
 [package]
-name = "gitx"
+name = "gitbit"
 version = "0.1.0"
 edition = "2024"
 description = "A lightweight Git automation tool that generates commit messages from diffs."
@@ -7,7 +7,7 @@ license = "MIT"
 
 
 [[bin]]
-name = "gitx"
+name = "gitbit"
 path = "src/main.rs"
 
 [dependencies]

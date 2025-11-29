@@ -12,7 +12,7 @@ use std::io::{self, Write};
 use config::Config;
 
 #[derive(Parser)]
-#[command(author, version, about="gitx - AI Git Assistant")]
+#[command(author, version, about="gitbit - AI Git Assistant")]
 struct Args {
     #[command(subcommand)]
     command: Commands,
@@ -28,7 +28,7 @@ enum Commands {
 
     /// Stage files smartly, generate AI commit, push to remote
     Push {
-        /// Exclude files by pattern: gitx push -x file1 file2 "*.log"
+        /// Exclude files by pattern: gitbit push -x file1 file2 "*.log"
         #[arg(short='x', long="exclude", num_args = 1.., value_delimiter = ' ')]
         exclude: Vec<String>,
     },
@@ -40,7 +40,7 @@ fn main() {
     match args.command {
 
         /* ────────────────────────────────────────────────
-           gitx setup
+           gitbit setup
         ───────────────────────────────────────────────── */
         Commands::Setup => {
             print!("Enter your Gemini API key: ");
@@ -54,7 +54,7 @@ fn main() {
         }
 
         /* ────────────────────────────────────────────────
-           gitx fix-remote
+           gitbit fix-remote
         ───────────────────────────────────────────────── */
         Commands::FixRemote => {
             use git_remote::*;
@@ -97,7 +97,7 @@ fn main() {
         }
 
         /* ────────────────────────────────────────────────
-           gitx push (with -x exclusions)
+           gitbit push (with -x exclusions)
         ───────────────────────────────────────────────── */
         Commands::Push { exclude } => {
 
@@ -181,7 +181,7 @@ fn main() {
             }
 
             // 7. AI commit message
-            let cfg = Config::load().expect("Run gitx setup first.");
+            let cfg = Config::load().expect("Run gitbit setup first.");
             let diff = diff::get_diff();
             let msg = ai::generate_message(&diff, &cfg);
 
@@ -190,7 +190,7 @@ fn main() {
             git::git_commit(&msg);
             git::git_push();
 
-            println!("🚀 gitx push complete!");
+            println!("🚀 gitbit push complete!");
         }
     }
 }
