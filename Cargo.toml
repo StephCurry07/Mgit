@@ -8,7 +8,7 @@ repository = "https://github.com/StephCurry07/Mgit.git"
 homepage = "https://github.com/StephCurry07/Mgit"
 documentation = "https://github.com/StephCurry07/Mgit"
 readme = "README.md"
-keywords = ["git", "commit", "ai", "automation", "gemini", "cli"]
+keywords = ["git", "commit", "ai", "automation", "cli"]
 categories = ["command-line-utilities", "development-tools"]
 
 
