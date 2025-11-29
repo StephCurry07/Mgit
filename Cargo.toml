@@ -2,8 +2,14 @@
 name = "gitbit"
 version = "0.1.0"
 edition = "2024"
-description = "A lightweight Git automation tool that generates commit messages from diffs."
+description = "A lightweight Git automation tool that generates commit messages from diffs using AI (Gemini)."
 license = "MIT"
+repository = "https://github.com/StephCurry07/Mgit.git"
+homepage = "https://github.com/StephCurry07/Mgit"
+documentation = "https://github.com/StephCurry07/Mgit"
+readme = "README.md"
+keywords = ["git", "commit", "ai", "automation", "gemini", "cli"]
+categories = ["command-line-utilities", "development-tools"]
 
 
 [[bin]]
