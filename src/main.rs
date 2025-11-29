@@ -183,6 +183,11 @@ fn main() {
             // 7. AI commit message
             let cfg = Config::load().expect("Run gitbit setup first.");
             let diff = diff::get_diff();
+            
+            if diff.trim().is_empty() {
+                println!("⚠️  No staged changes detected. Using default commit message.");
+            }
+            
             let msg = ai::generate_message(&diff, &cfg);
 
             println!("\n🧠 Commit message:\n{}\n", msg);

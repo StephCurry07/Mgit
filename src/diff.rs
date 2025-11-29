@@ -2,7 +2,7 @@ use std::process::Command;
 
 pub fn get_diff() -> String {
     let output = Command::new("git")
-        .args(["diff"])
+        .args(["diff", "--staged"])
         .output()
         .expect("Failed to run git diff");
 
