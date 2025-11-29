@@ -1,5 +1,5 @@
-use serde_json::json;
 use crate::config::Config;
+use serde_json::json;
 
 pub fn generate_message(diff: &str, cfg: &Config) -> String {
     // If diff is empty, return a default message
@@ -49,13 +49,13 @@ pub fn generate_message(diff: &str, cfg: &Config) -> String {
 
 fn is_error_message(msg: &str) -> bool {
     let lower = msg.to_lowercase();
-    lower.contains("please provide") ||
-    lower.contains("i need to see") ||
-    lower.contains("error") ||
-    lower.contains("cannot") ||
-    lower.contains("unable") ||
-    lower.contains("diff is required") ||
-    lower.contains("no diff") ||
-    lower.starts_with("sorry") ||
-    (lower.len() > 100 && lower.contains("?")) // Long messages with questions are likely errors
+    lower.contains("please provide")
+        || lower.contains("i need to see")
+        || lower.contains("error")
+        || lower.contains("cannot")
+        || lower.contains("unable")
+        || lower.contains("diff is required")
+        || lower.contains("no diff")
+        || lower.starts_with("sorry")
+        || (lower.len() > 100 && lower.contains("?")) // Long messages with questions are likely errors
 }

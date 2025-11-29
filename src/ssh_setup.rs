@@ -1,5 +1,5 @@
-use std::process::Command;
 use std::fs;
+use std::process::Command;
 
 pub fn ensure_ssh_key() {
     let ssh_key = format!("{}/.ssh/id_ed25519", std::env::var("HOME").unwrap());
@@ -14,8 +14,7 @@ pub fn ensure_ssh_key() {
 
 pub fn show_public_key() {
     let pubkey_path = format!("{}/.ssh/id_ed25519.pub", std::env::var("HOME").unwrap());
-    let pubkey = fs::read_to_string(pubkey_path)
-        .expect("Could not read public key");
+    let pubkey = fs::read_to_string(pubkey_path).expect("Could not read public key");
     println!("📋 Add this SSH key to GitHub:\n\n{}", pubkey);
 }
 

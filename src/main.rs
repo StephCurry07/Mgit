@@ -1,18 +1,20 @@
+mod ai;
+mod changelog;
 mod config;
 mod diff;
-mod ai;
+mod docs;
 mod git;
-mod git_status;
 mod git_remote;
+mod git_status;
 mod ssh_setup;
 mod staging;
 
 use clap::{Parser, Subcommand};
-use std::io::{self, Write};
 use config::Config;
+use std::io::{self, Write};
 
 #[derive(Parser)]
-#[command(author, version, about="gitbit - AI Git Assistant")]
+#[command(author, version, about = "gitbit - AI Git Assistant")]
 struct Args {
     #[command(subcommand)]
     command: Commands,
@@ -32,13 +34,26 @@ enum Commands {
         #[arg(short='x', long="exclude", num_args = 1.., value_delimiter = ' ')]
         exclude: Vec<String>,
     },
+
+    /// Generate release notes from commits since last version and update CHANGELOG.md
+    Release {
+        /// Version number (defaults to version in Cargo.toml)
+        #[arg(short, long)]
+        version: Option<String>,
+    },
+
+    /// Generate and open API documentation
+    Doc {
+        /// Don't open browser automatically
+        #[arg(long)]
+        no_open: bool,
+    },
 }
 
 fn main() {
     let args = Args::parse();
 
     match args.command {
-
         /* ────────────────────────────────────────────────
            gitbit setup
         ───────────────────────────────────────────────── */
@@ -100,7 +115,6 @@ fn main() {
            gitbit push (with -x exclusions)
         ───────────────────────────────────────────────── */
         Commands::Push { exclude } => {
-
             // 1. Must be a Git repo
             if !git_status::is_git_repo() {
                 println!("❌ Not a Git repository.");
@@ -183,11 +197,11 @@ fn main() {
             // 7. AI commit message
             let cfg = Config::load().expect("Run gitbit setup first.");
             let diff = diff::get_diff();
-            
+
             if diff.trim().is_empty() {
                 println!("⚠️  No staged changes detected. Using default commit message.");
             }
-            
+
             let msg = ai::generate_message(&diff, &cfg);
 
             println!("\n🧠 Commit message:\n{}\n", msg);
@@ -196,6 +210,96 @@ fn main() {
             git::git_push();
 
             println!("🚀 gitbit push complete!");
+        }
+
+        /* ────────────────────────────────────────────────
+           gitbit release
+        ───────────────────────────────────────────────── */
+        Commands::Release { version } => {
+            if !git_status::is_git_repo() {
+                println!("❌ Not a Git repository.");
+                return;
+            }
+
+            let cfg = Config::load().expect("Run gitbit setup first.");
+            let version = version.unwrap_or_else(|| changelog::get_current_version());
+            
+            println!("📝 Generating release notes for v{}...", version);
+            
+            let commits = changelog::get_all_commits_since_last_release();
+            
+            if commits.is_empty() {
+                println!("⚠️  No commits found since last release.");
+                return;
+            }
+
+            println!("📋 Found {} commits since last release", commits.len());
+            
+            let release_notes = changelog::generate_release_notes(&commits, &version, &cfg);
+            
+            println!("\n📄 Generated release notes:\n");
+            println!("{}", release_notes);
+            println!("\n");
+            
+            // Ask for confirmation before updating CHANGELOG.md
+            print!("Update CHANGELOG.md? (y/n): ");
+            io::stdout().flush().unwrap();
+            
+            let mut confirm = String::new();
+            io::stdin().read_line(&mut confirm).unwrap();
+            
+            let confirm = confirm.trim().to_lowercase();
+            if confirm == "y" || confirm == "yes" {
+                match changelog::update_changelog(&release_notes) {
+                    Ok(_) => println!("✅ CHANGELOG.md updated!"),
+                    Err(e) => println!("❌ Failed to update CHANGELOG.md: {}", e),
+                }
+            } else {
+                println!("❌ Skipped updating CHANGELOG.md");
+            }
+        }
+
+        /* ────────────────────────────────────────────────
+           gitbit doc
+        ───────────────────────────────────────────────── */
+        Commands::Doc { no_open } => {
+            if let Err(e) = docs::ensure_doc_dir() {
+                println!("❌ Failed to create doc/ directory: {}", e);
+                return;
+            }
+            
+            let doc_files = docs::list_doc_files();
+            if !doc_files.is_empty() {
+                println!("📄 Documentation files in doc/:");
+                for file in &doc_files {
+                    println!("   - {}", file);
+                }
+                println!();
+            }
+            
+            if no_open {
+                // Just generate docs without opening
+                let status = Command::new("cargo")
+                    .args(["doc", "--no-deps"])
+                    .status();
+                
+                match status {
+                    Ok(s) if s.success() => {
+                        println!("✅ Documentation generated at target/doc/");
+                    }
+                    Ok(_) => {
+                        println!("❌ Failed to generate documentation");
+                    }
+                    Err(e) => {
+                        println!("❌ Error running cargo doc: {}", e);
+                    }
+                }
+            } else {
+                // Generate and open in browser
+                if let Err(e) = docs::generate_docs(true) {
+                    println!("❌ Failed to generate documentation: {}", e);
+                }
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ pub fn default_ignores() -> Vec<&'static str> {
         "*.tmp",
         ".vscode/*",
         ".idea/*",
-        "*.env"
+        "*.env",
     ]
 }
 
@@ -29,7 +29,9 @@ pub fn get_changes() -> Vec<Change> {
     let mut changes = Vec::new();
 
     for line in stdout.lines() {
-        if line.trim().is_empty() { continue; }
+        if line.trim().is_empty() {
+            continue;
+        }
 
         let status = line[0..2].trim().to_string();
         let path = line[3..].trim().to_string();
@@ -41,10 +43,9 @@ pub fn get_changes() -> Vec<Change> {
 }
 
 pub fn filter_changes(
-    changes: &[Change], 
-    user_excludes: &[String]
+    changes: &[Change],
+    user_excludes: &[String],
 ) -> (Vec<String>, Vec<String>, Vec<String>) {
-
     let mut ignored_default = Vec::new();
     let mut ignored_user = Vec::new();
     let mut final_files = Vec::new();
@@ -52,12 +53,18 @@ pub fn filter_changes(
     for ch in changes {
         let path = &ch.path;
 
-        if default_ignores().iter().any(|p| Pattern::new(p).unwrap().matches(path)) {
+        if default_ignores()
+            .iter()
+            .any(|p| Pattern::new(p).unwrap().matches(path))
+        {
             ignored_default.push(path.clone());
             continue;
         }
 
-        if user_excludes.iter().any(|p| Pattern::new(p).unwrap().matches(path)) {
+        if user_excludes
+            .iter()
+            .any(|p| Pattern::new(p).unwrap().matches(path))
+        {
             ignored_user.push(path.clone());
             continue;
         }
